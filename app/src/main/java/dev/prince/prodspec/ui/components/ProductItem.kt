@@ -16,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.prince.prodspec.R
 import dev.prince.prodspec.data.Product
 import dev.prince.prodspec.ui.theme.DarkGray
 import dev.prince.prodspec.ui.theme.LightOrange
@@ -45,7 +47,8 @@ fun ProductItem(
                 .height(110.dp)
                 .size(54.dp)
                 .clip(shape = RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.img_placeholder)
         )
 
         Text(

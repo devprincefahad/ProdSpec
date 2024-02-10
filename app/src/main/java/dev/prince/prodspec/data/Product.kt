@@ -1,8 +1,13 @@
 package dev.prince.prodspec.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
+@Entity(tableName = "product")
 data class Product(
+    @PrimaryKey(autoGenerate = true)
+    var id: Int,
     @SerializedName("image")
     var image: String,
     @SerializedName("price")

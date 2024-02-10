@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,10 +47,6 @@ fun HomeScreen(
     val products by viewModel.products.collectAsState(initial = Resource.Loading)
     var search by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit){
-        viewModel.getProductsList()
-    }
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(count = 2),
         modifier = Modifier
@@ -59,7 +54,9 @@ fun HomeScreen(
             .padding(16.dp)
     ) {
 
-        item {
+        item(
+            span = { GridItemSpan(2) }
+        ) {
             SearchBar(
                 value = search,
                 onValueChange = {
@@ -114,7 +111,7 @@ fun HomeScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No drinks available",
+                                text = "No Products available",
                                 color = LightOrange,
                                 modifier = Modifier
                                     .padding(32.dp),
@@ -138,7 +135,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "An error occurred!",
+                            text = (products as Resource.Error).message,
                             color = LightOrange,
                             modifier = Modifier
                                 .padding(32.dp),
