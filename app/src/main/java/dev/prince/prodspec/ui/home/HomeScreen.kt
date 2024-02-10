@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +30,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.prince.prodspec.data.Product
 import dev.prince.prodspec.ui.components.ProductItem
 import dev.prince.prodspec.ui.components.SearchBar
-import dev.prince.prodspec.ui.theme.LightOrange
+import dev.prince.prodspec.ui.theme.Blue
 import dev.prince.prodspec.ui.theme.poppinsFamily
 import dev.prince.prodspec.util.Resource
 
@@ -47,39 +45,34 @@ fun HomeScreen(
     val products by viewModel.products.collectAsState(initial = Resource.Loading)
     var search by remember { mutableStateOf("") }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(count = 2),
+    LazyColumn(
+        //columns = GridCells.Fixed(count = 2),
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
 
-        item(
-            span = { GridItemSpan(2) }
-        ) {
+        item {
             SearchBar(
                 value = search,
                 onValueChange = {
-                    if (it.length <= 30) {
+                    if (it.length <= 20) {
                         search = it
-                        viewModel.searchProducts(search)
+                        viewModel.searchProducts(it)
                     }
                 }
             )
         }
 
-
         when (products) {
             is Resource.Loading -> {
-                item(
-                    span = { GridItemSpan(2) }
-                ) {
+                item {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
-                            color = LightOrange,
+                            color = Blue,
                             modifier = Modifier
                                 .padding(32.dp)
                                 .size(36.dp)
@@ -91,28 +84,21 @@ fun HomeScreen(
             is Resource.Success -> {
                 val productList = (products as Resource.Success<List<Product>>).data
                 if (!productList.isNullOrEmpty()) {
-                    item(
-                        span = { GridItemSpan(2) }
-                    ) {
+                    item {
                         Spacer(Modifier.height(16.dp))
                     }
                     items(productList) { item ->
-                        ProductItem(
-                            navigator = navigator,
-                            product = item
-                        )
+                        ProductItem(product = item)
                     }
                 } else {
-                    item(
-                        span = { GridItemSpan(2) }
-                    ) {
+                    item {
                         Box(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "No Products available",
-                                color = LightOrange,
+                                color = Blue,
                                 modifier = Modifier
                                     .padding(32.dp),
                                 style = TextStyle(
@@ -127,16 +113,14 @@ fun HomeScreen(
             }
 
             is Resource.Error -> {
-                item(
-                    span = { GridItemSpan(2) }
-                ) {
+                item {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = (products as Resource.Error).message,
-                            color = LightOrange,
+                            color = Blue,
                             modifier = Modifier
                                 .padding(32.dp),
                             style = TextStyle(

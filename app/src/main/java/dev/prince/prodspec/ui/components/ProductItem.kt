@@ -1,14 +1,20 @@
 package dev.prince.prodspec.ui.components
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,22 +22,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.prince.prodspec.R
 import dev.prince.prodspec.data.Product
 import dev.prince.prodspec.ui.theme.DarkGray
-import dev.prince.prodspec.ui.theme.LightOrange
+import dev.prince.prodspec.ui.theme.Blue
 import dev.prince.prodspec.ui.theme.poppinsFamily
 
 @Composable
 fun ProductItem(
-    navigator: DestinationsNavigator,
     product: Product
 ) {
 
@@ -39,30 +48,66 @@ fun ProductItem(
         modifier = Modifier.padding(6.dp)
     ) {
 
-        AsyncImage(
-            model = product.image,
-            contentDescription = null,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(110.dp)
-                .size(54.dp)
-                .clip(shape = RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Crop,
-            error = painterResource(id = R.drawable.img_placeholder)
-        )
-
-        Text(
-            text = product.productName,
-            modifier = Modifier
-                .padding(top = 4.dp)
-                .fillMaxWidth(),
-            style = TextStyle(
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                fontFamily = poppinsFamily
+                .clip(shape = RoundedCornerShape(12.dp))
+        ) {
+            AsyncImage(
+                model = product.image,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+                    .clip(shape = RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop,
+                error = painterResource(id = R.drawable.img_placeholder)
             )
-        )
+
+            Text(
+                modifier = Modifier
+                    .background(Blue)
+                    .padding(horizontal = 8.dp),
+                text = product.tax.toString(),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    fontFamily = poppinsFamily
+                )
+            )
+
+        }
+
+        Row(
+            modifier = Modifier
+                .padding(top = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(
+                text = product.productName,
+                modifier = Modifier
+                    .weight(1f),
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    fontFamily = poppinsFamily
+                )
+            )
+
+            Text(
+                text = product.price.toString(),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Blue,
+                    fontFamily = poppinsFamily
+                )
+            )
+
+        }
 
         Text(
             text = product.productType,
@@ -76,42 +121,6 @@ fun ProductItem(
             )
         )
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Text(
-                text = product.price.toString(),
-                modifier = Modifier
-                    .padding(end = 4.dp)
-                    .weight(1f),
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = LightOrange,
-                    fontFamily = poppinsFamily
-                )
-            )
-
-            Text(
-                modifier = Modifier
-                    .border(
-                        1.dp, LightOrange,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-//                    .noRippleClickable {
-//                        navigator.navigate(DetailScreenDestination(product))
-//                    },
-                text = "View",
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = LightOrange,
-                    fontFamily = poppinsFamily
-                )
-            )
-        }
     }
 }
 

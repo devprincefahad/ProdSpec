@@ -14,4 +14,4 @@ val LightGray = Color(0xFFF0F0F0)
 val NormalGray = Color(0xFFD5D5D5)
 val DarkGray = Color(0xFF868686)
 
-val LightOrange = Color(0xFFE95A4F)
+val Blue = Color(0xFF1589E6)
