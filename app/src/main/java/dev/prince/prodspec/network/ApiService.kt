@@ -1,11 +1,11 @@
 package dev.prince.prodspec.network
 
-import dev.prince.prodspec.data.ProductResponse
+import dev.prince.prodspec.data.Product
 import retrofit2.http.GET
 
 interface ApiService {
 
-    @GET("get")
-    suspend fun getProducts(): ProductResponse
+    @GET("public/get")
+    suspend fun getProducts(): List<Product>
 
 }

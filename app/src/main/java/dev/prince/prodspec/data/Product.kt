@@ -6,11 +6,11 @@ data class Product(
     @SerializedName("image")
     var image: String,
     @SerializedName("price")
-    var price: Int,
+    var price: Double,
     @SerializedName("product_name")
     var productName: String,
     @SerializedName("product_type")
     var productType: String,
     @SerializedName("tax")
-    var tax: Int
+    var tax: Double
 )
