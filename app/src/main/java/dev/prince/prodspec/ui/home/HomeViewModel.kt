@@ -10,7 +10,6 @@ import dev.prince.prodspec.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,24 +27,32 @@ class HomeViewModel @Inject constructor(
 
     private fun getProductsList() {
         viewModelScope.launch {
+            _products.value = Resource.Loading
             try {
-                val result = api.getProductsFromApi()
-                productDao.insert(result)
-                val cachedProducts = productDao.getProductsFromDB()
-                _products.emit(Resource.Success(cachedProducts))
-            } catch (e: Exception) {
-                val cachedProducts = productDao.getProductsFromDB()
-                if (e is IOException) {
-                    if (cachedProducts.isNotEmpty()) {
-                        _products.emit(Resource.Success(cachedProducts))
+                productDao.getProductsFromDB().collect { products ->
+                    if (products.isNotEmpty()) {
+                        _products.value = Resource.Success(products)
                     } else {
-                        _products.emit(Resource.Error("No internet connection"))
+                        val apiProducts = api.getProductsFromApi()
+                        productDao.insert(apiProducts)
+                        _products.value = Resource.Success(apiProducts)
                     }
-                } else {
-                    _products.emit(Resource.Error(e.message ?: "Something went wrong"))
                 }
-                e.printStackTrace()
+            } catch (e: Exception) {
+                _products.value = Resource.Error("Failed to fetch products")
             }
         }
     }
+
+    fun searchProducts(query: String) {
+        viewModelScope.launch {
+            productDao.getProductsFromDB().collect { products ->
+                val filteredProducts = products.filter { product ->
+                    product.productName.contains(query, ignoreCase = true)
+                }
+                _products.value = Resource.Success(filteredProducts)
+            }
+        }
+    }
+
 }

@@ -62,7 +62,7 @@ fun HomeScreen(
                 onValueChange = {
                     if (it.length <= 30) {
                         search = it
-                        /*perform search*/
+                        viewModel.searchProducts(search)
                     }
                 }
             )
