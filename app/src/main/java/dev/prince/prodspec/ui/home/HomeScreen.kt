@@ -6,7 +6,6 @@ import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -45,6 +44,7 @@ import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.prince.prodspec.R
 import dev.prince.prodspec.data.Product
+import dev.prince.prodspec.ui.components.BottomSheet
 import dev.prince.prodspec.ui.components.ProductItem
 import dev.prince.prodspec.ui.components.SearchBar
 import dev.prince.prodspec.ui.theme.Blue
@@ -63,16 +63,11 @@ fun HomeScreen(
     val products by viewModel.products.collectAsState(initial = Resource.Loading)
     var search by remember { mutableStateOf("") }
 
-    val listState = rememberLazyListState()
-    val fabVisibility by derivedStateOf {
-        listState.firstVisibleItemIndex == 0
-    }
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
-            AddProductFab(isVisibleBecauseOfScrolling = fabVisibility)
+            AddProductFab()
         }
     ) { contentPadding ->
 
@@ -80,8 +75,7 @@ fun HomeScreen(
             modifier = Modifier
                 .padding(contentPadding)
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, bottom = 26.dp),
-            state = listState
+                .padding(start = 16.dp, end = 16.dp, bottom = 26.dp)
         ) {
 
             item {
@@ -182,49 +176,60 @@ fun HomeScreen(
         }
 
     }
+    if (viewModel.showSheet) {
+        BottomSheet(
+            onDismiss = {
+                viewModel.showSheet = false
+            },
+            content = {
+                Text(
+                    text = "Hello",
+                    color = Blue,
+                    modifier = Modifier
+                        .padding(32.dp),
+                    style = TextStyle(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = poppinsFamily
+                    )
+                )
+            }
+        )
+    }
 }
 
 
 @Composable
 fun AddProductFab(
-    isVisibleBecauseOfScrolling: Boolean,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val density = LocalDensity.current
-    AnimatedVisibility(
-        visible = isVisibleBecauseOfScrolling,
-        enter = slideInVertically {
-            with(density) { 40.dp.roundToPx() }
-        } + fadeIn(),
-        exit = fadeOut(
-            animationSpec = keyframes {
-                this.durationMillis = 120
-            }
-        )
-    ) {
-        ExtendedFloatingActionButton(
-            containerColor = Blue,
-            text = {
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    text = "Add Product",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White,
-                        fontFamily = poppinsFamily
-                    )
+
+    ExtendedFloatingActionButton(
+        containerColor = Blue,
+        text = {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp),
+                text = "Add Product",
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    fontFamily = poppinsFamily
                 )
-            },
-            onClick = { },
-            icon = {
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    painter = painterResource(id = R.drawable.icon_add),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
-        )
-    }
+            )
+        },
+        onClick = {
+            viewModel.showSheet = true
+        },
+        icon = {
+            Icon(
+                modifier = Modifier.size(32.dp),
+                painter = painterResource(id = R.drawable.icon_add),
+                contentDescription = null,
+                tint = Color.White
+            )
+        }
+    )
+
 }

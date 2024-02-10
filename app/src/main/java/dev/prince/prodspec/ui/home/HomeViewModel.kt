@@ -1,5 +1,8 @@
 package dev.prince.prodspec.ui.home
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +23,8 @@ class HomeViewModel @Inject constructor(
 
     private val _products = MutableStateFlow<Resource<List<Product>>>(Resource.Loading)
     val products: StateFlow<Resource<List<Product>>> = _products
+
+    var showSheet by mutableStateOf(false)
 
     init {
         getProductsList()
