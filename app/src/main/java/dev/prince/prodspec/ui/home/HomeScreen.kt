@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +27,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
@@ -33,6 +37,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +66,7 @@ import dev.prince.prodspec.ui.components.BottomSheet
 import dev.prince.prodspec.ui.components.ProductItem
 import dev.prince.prodspec.ui.components.SearchBar
 import dev.prince.prodspec.ui.theme.Blue
+import dev.prince.prodspec.ui.theme.DarkWhite
 import dev.prince.prodspec.ui.theme.Gray
 import dev.prince.prodspec.ui.theme.poppinsFamily
 import dev.prince.prodspec.util.Resource
@@ -82,7 +88,8 @@ fun HomeScreen(
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
             AddProductFab()
-        }
+        },
+        containerColor = DarkWhite
     ) { contentPadding ->
 
         LazyColumn(
@@ -238,7 +245,6 @@ fun AddProductFab(
 }
 
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
 
@@ -262,35 +268,62 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
 
     Column(
         modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        AsyncImage(
-            model = imageUri,
-            contentDescription = null,
+        Box(
             modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
                 .border(
                     BorderStroke(1.dp, Gray),
                     shape = RoundedCornerShape(8.dp)
                 )
-                .height(110.dp)
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+                .height(180.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .clickable {
                     galleryLauncher.launch("image/*")
                 },
-            contentScale = ContentScale.Fit,
-            error = painterResource(id = R.drawable.img_placeholder)
-        )
+            contentAlignment = Alignment.Center
+        ) {
+            if (imageUri != null) {
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+
+                )
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.icon_add_photo),
+                        contentDescription = "Add Image",
+                        modifier = Modifier
+                            .size(80.dp),
+                        tint = Gray
+                    )
+                    Text(
+                        text = "Add Image",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Gray,
+                            fontFamily = poppinsFamily
+                        )
+                    )
+                }
+            }
+        }
 
         OutlinedTextField(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
             value = productName,
             label = {
@@ -331,7 +364,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
 
         OutlinedTextField(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
             value = productType,
             label = {
@@ -372,7 +405,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
 
         OutlinedTextField(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
             value = tax,
             label = {
@@ -413,7 +446,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
 
         OutlinedTextField(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
             value = price,
             label = {
@@ -454,7 +487,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
 
         Button(
             modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 16.dp)
                 .fillMaxWidth()
                 .height(50.dp),
             onClick = {
@@ -476,5 +509,8 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
                 )
             )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
     }
 }

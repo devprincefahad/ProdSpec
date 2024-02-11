@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.prince.prodspec.R
 import dev.prince.prodspec.ui.theme.DarkGray
-import dev.prince.prodspec.ui.theme.LightGray
+import dev.prince.prodspec.ui.theme.DarkWhite
 import dev.prince.prodspec.ui.theme.poppinsFamily
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -41,8 +41,8 @@ fun SearchBar(
     TextField(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
-            .padding(top = 16.dp),
+            .background(DarkWhite)
+            .padding(top = 12.dp),
         shape = CircleShape,
         value = value,
         onValueChange = onValueChange,
@@ -69,8 +69,8 @@ fun SearchBar(
         colors = TextFieldDefaults.colors(
             focusedTextColor = DarkGray,
             disabledTextColor = DarkGray,
-            focusedContainerColor = LightGray,
-            unfocusedContainerColor = LightGray,
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent

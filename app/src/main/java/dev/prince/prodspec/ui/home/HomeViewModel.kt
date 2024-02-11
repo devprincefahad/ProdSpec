@@ -22,6 +22,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.text.DecimalFormat
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -107,6 +108,11 @@ class HomeViewModel @Inject constructor(
             }
         }
         return file
+    }
+
+    fun addCommasToPrice(price: Float): String {
+        val formatter = DecimalFormat("##,##,###.00")
+        return formatter.format(price)
     }
 
 }

@@ -15,4 +15,6 @@ val NormalGray = Color(0xFFD5D5D5)
 val DarkGray = Color(0xFF868686)
 val Gray = Color(0xD3515151)
 
+val DarkWhite = Color(0xFFEBEBEB)
+
 val Blue = Color(0xFF1589E6)
