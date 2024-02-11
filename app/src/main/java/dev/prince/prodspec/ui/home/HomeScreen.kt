@@ -2,6 +2,7 @@ package dev.prince.prodspec.ui.home
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -51,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -200,7 +202,6 @@ fun HomeScreen(
                 }
             }
         }
-
     }
     if (viewModel.showSheet) {
         BottomSheet(
@@ -451,15 +452,21 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
                 color = Color.Black
             )
         )
-
+        val context = LocalContext.current
         Button(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 16.dp)
                 .fillMaxWidth()
                 .height(50.dp),
             onClick = {
-                isAddingProduct = true
-                viewModel.addItem(productName, price, tax, imageUri)
+                if (productName.isNotBlank() && price.isNotBlank() && tax.isNotBlank() &&
+                    viewModel.productType.isNotBlank() && viewModel.productType != "Select Product Category"
+                ) {
+                    isAddingProduct = true
+                    viewModel.addItem(productName, price, tax, imageUri)
+                } else {
+                    Toast.makeText(context, "Please provide all product details", Toast.LENGTH_SHORT).show()
+                }
             },
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
