@@ -2,4 +2,9 @@
 <resources>
 
     <style name="Theme.ProdSpec" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.ProdSpec</item>
+    </style>
 </resources>
