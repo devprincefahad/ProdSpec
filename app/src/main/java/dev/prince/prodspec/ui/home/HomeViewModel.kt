@@ -2,6 +2,7 @@ package dev.prince.prodspec.ui.home
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +27,7 @@ import java.text.DecimalFormat
 import javax.inject.Inject
 import kotlin.random.Random
 
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val api: ApiService,
@@ -49,14 +51,24 @@ class HomeViewModel @Inject constructor(
                 productDao.getProductsFromDB().collect { products ->
                     if (products.isNotEmpty()) {
                         _products.value = Resource.Success(products)
-                    } else {
-                        val apiProducts = api.getProductsFromApi()
-                        productDao.insert(apiProducts)
-                        _products.value = Resource.Success(apiProducts)
                     }
                 }
             } catch (e: Exception) {
+                _products.value = Resource.Error("Failed to fetch products from db")
+                e.printStackTrace()
+            }
+        }
+        fetchProductListFromNetwork()
+    }
+
+    private fun fetchProductListFromNetwork() {
+        viewModelScope.launch {
+            try {
+                val apiProducts = api.getProductsFromApi()
+                productDao.insert(apiProducts)
+            } catch (e: Exception) {
                 _products.value = Resource.Error("Failed to fetch products")
+                e.printStackTrace()
             }
         }
     }
@@ -89,6 +101,7 @@ class HomeViewModel @Inject constructor(
                     tax.toRequestBody(),
                     imagePart
                 )
+                fetchProductListFromNetwork()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
