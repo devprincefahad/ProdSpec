@@ -1,12 +1,15 @@
 package dev.prince.prodspec.ui.home
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.keyframes
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,30 +18,40 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -48,6 +61,7 @@ import dev.prince.prodspec.ui.components.BottomSheet
 import dev.prince.prodspec.ui.components.ProductItem
 import dev.prince.prodspec.ui.components.SearchBar
 import dev.prince.prodspec.ui.theme.Blue
+import dev.prince.prodspec.ui.theme.Gray
 import dev.prince.prodspec.ui.theme.poppinsFamily
 import dev.prince.prodspec.util.Resource
 
@@ -182,22 +196,11 @@ fun HomeScreen(
                 viewModel.showSheet = false
             },
             content = {
-                Text(
-                    text = "Hello",
-                    color = Blue,
-                    modifier = Modifier
-                        .padding(32.dp),
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = poppinsFamily
-                    )
-                )
+                AddProductForm()
             }
         )
     }
 }
-
 
 @Composable
 fun AddProductFab(
@@ -232,4 +235,246 @@ fun AddProductFab(
         }
     )
 
+}
+
+
+@SuppressLint("StateFlowValueCalledInComposition")
+@Composable
+fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
+
+    var productName by remember { mutableStateOf("") }
+    var productType by remember { mutableStateOf("") }
+    var price by remember { mutableStateOf("") }
+    var tax by remember { mutableStateOf("") }
+
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                imageUri = it
+            }
+        }
+    )
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        AsyncImage(
+            model = imageUri,
+            contentDescription = null,
+            modifier = Modifier
+                .border(
+                    BorderStroke(1.dp, Gray),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .height(110.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .clickable {
+                    galleryLauncher.launch("image/*")
+                },
+            contentScale = ContentScale.Fit,
+            error = painterResource(id = R.drawable.img_placeholder)
+        )
+
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth(),
+            value = productName,
+            label = {
+                Text(
+                    text = "Product Name",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = poppinsFamily,
+                        color = Gray
+                    )
+                )
+            },
+            shape = RoundedCornerShape(8.dp),
+            onValueChange = {
+                if (it.length <= 25) {
+                    productName = it
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedBorderColor = Color.Black,
+                unfocusedBorderColor = Color.Black,
+                focusedLabelColor = Color.Black,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray
+            ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text
+            ),
+            textStyle = TextStyle(
+                fontSize = 12.sp,
+                fontFamily = poppinsFamily,
+                color = Color.Black
+            )
+        )
+
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth(),
+            value = productType,
+            label = {
+                Text(
+                    text = "Product Type",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = poppinsFamily,
+                        color = Gray
+                    )
+                )
+            },
+            shape = RoundedCornerShape(8.dp),
+            onValueChange = {
+                if (it.length <= 25) {
+                    productType = it
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedBorderColor = Color.Black,
+                unfocusedBorderColor = Color.Black,
+                focusedLabelColor = Color.Black,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray
+            ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text
+            ),
+            textStyle = TextStyle(
+                fontSize = 12.sp,
+                fontFamily = poppinsFamily,
+                color = Color.Black
+            )
+        )
+
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth(),
+            value = tax,
+            label = {
+                Text(
+                    text = "Tax",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = poppinsFamily,
+                        color = Gray
+                    )
+                )
+            },
+            shape = RoundedCornerShape(8.dp),
+            onValueChange = {
+                if (it.length <= 25) {
+                    tax = it
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedBorderColor = Color.Black,
+                unfocusedBorderColor = Color.Black,
+                focusedLabelColor = Color.Black,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray
+            ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
+            textStyle = TextStyle(
+                fontSize = 12.sp,
+                fontFamily = poppinsFamily,
+                color = Color.Black
+            )
+        )
+
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth(),
+            value = price,
+            label = {
+                Text(
+                    text = "Price",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = poppinsFamily,
+                        color = Gray
+                    )
+                )
+            },
+            shape = RoundedCornerShape(8.dp),
+            onValueChange = {
+                if (it.length <= 25) {
+                    price = it
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedBorderColor = Color.Black,
+                unfocusedBorderColor = Color.Black,
+                focusedLabelColor = Color.Black,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray
+            ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
+            textStyle = TextStyle(
+                fontSize = 12.sp,
+                fontFamily = poppinsFamily,
+                color = Color.Black
+            )
+        )
+
+        Button(
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 16.dp)
+                .fillMaxWidth()
+                .height(50.dp),
+            onClick = {
+                viewModel.addItem(productName, productType, price, tax, imageUri)
+                viewModel.showSheet = false
+            },
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Blue,
+                contentColor = Color.White
+            )
+        ) {
+            Text(
+                text = "Add Product",
+                style = TextStyle(
+                    fontSize = 22.sp,
+                    fontFamily = poppinsFamily,
+                    fontWeight = FontWeight.Medium
+                )
+            )
+        }
+    }
 }
