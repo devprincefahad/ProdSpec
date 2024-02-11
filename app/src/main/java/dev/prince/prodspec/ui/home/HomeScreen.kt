@@ -254,9 +254,10 @@ fun AddProductFab(
 fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
 
     var productName by remember { mutableStateOf("") }
-//    var productType by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var tax by remember { mutableStateOf("") }
+
+    var isAddingProduct by remember { mutableStateOf(false) }
 
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
@@ -457,8 +458,8 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
                 .fillMaxWidth()
                 .height(50.dp),
             onClick = {
+                isAddingProduct = true
                 viewModel.addItem(productName, price, tax, imageUri)
-                viewModel.showSheet = false
             },
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
@@ -466,18 +467,32 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
                 contentColor = Color.White
             )
         ) {
-            Text(
-                text = "Add Product",
-                style = TextStyle(
-                    fontSize = 22.sp,
-                    fontFamily = poppinsFamily,
-                    fontWeight = FontWeight.Medium
+            if (isAddingProduct) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White
                 )
-            )
+            } else {
+                Text(
+                    text = "Add Product",
+                    style = TextStyle(
+                        fontSize = 22.sp,
+                        fontFamily = poppinsFamily,
+                        fontWeight = FontWeight.Medium
+                    )
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        LaunchedEffect(isAddingProduct) {
+            if (isAddingProduct) {
+                delay(2000)
+                isAddingProduct = false
+                viewModel.showSheet = false
+            }
+        }
     }
 }
 
