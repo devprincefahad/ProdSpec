@@ -2,7 +2,6 @@ package dev.prince.prodspec.ui.home
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +38,24 @@ class HomeViewModel @Inject constructor(
     val products: StateFlow<Resource<List<Product>>> = _products
 
     var showSheet by mutableStateOf(false)
+
+    var category by mutableStateOf("Select Product Category")
+
+    var productType by mutableStateOf("")
+
+    var expandedCategoryField by mutableStateOf(false)
+    var hideKeyboard by mutableStateOf(false)
+
+    val categories = listOf(
+        "Clothing",
+        "Electronics",
+        "Home & Kitchen",
+        "Beauty",
+        "Furniture",
+        "Grocery",
+        "Watches",
+        "Other"
+    )
 
     init {
         getProductsList()
@@ -85,7 +102,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun addItem(
-        productName: String, productType: String, price: String, tax: String, imageUri: Uri?
+        productName: String, price: String, tax: String, imageUri: Uri?
     ) {
         val imagePart: List<MultipartBody.Part>? = imageUri?.let { uri ->
             val imageFile: File = getFileFromUri(context, uri)
