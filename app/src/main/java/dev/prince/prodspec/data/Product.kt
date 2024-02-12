@@ -1,10 +1,11 @@
 package dev.prince.prodspec.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
-@Entity(tableName = "product")
+@Entity(tableName = "product",indices = [Index(value = ["productName"], unique = true)])
 data class Product(
     @PrimaryKey(autoGenerate = true)
     var id: Int,
