@@ -83,6 +83,8 @@ class HomeViewModel @Inject constructor(
                 productDao.getProductsFromDB().collect { products ->
                     if (products.isNotEmpty()) {
                         _products.value = Resource.Success(products)
+                    } else {
+                        _products.value = Resource.Error("Products could not be loaded. Please check your internet connection.")
                     }
                 }
             } catch (e: Exception) {
@@ -99,7 +101,6 @@ class HomeViewModel @Inject constructor(
                 val apiProducts = api.getProductsFromApi()
                 productDao.insert(apiProducts)
             } catch (e: Exception) {
-                _products.value = Resource.Error("Failed to fetch products")
                 e.printStackTrace()
             }
         }
