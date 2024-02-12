@@ -1,18 +1,22 @@
 package dev.prince.prodspec.ui.home
 
+import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.prince.prodspec.R
 import dev.prince.prodspec.data.Product
 import dev.prince.prodspec.database.ProductDao
 import dev.prince.prodspec.network.ApiService
+import dev.prince.prodspec.util.CHANNEL_ID
 import dev.prince.prodspec.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -118,6 +122,7 @@ class HomeViewModel @Inject constructor(
                     tax.toRequestBody(),
                     imagePart
                 )
+                showNotification("Product Added", "Your $productName has been successfully added.")
                 fetchProductListFromNetwork()
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -143,6 +148,17 @@ class HomeViewModel @Inject constructor(
     fun addCommasToPrice(price: Float): String {
         val formatter = DecimalFormat("##,##,###.00")
         return formatter.format(price)
+    }
+
+    private fun showNotification(title: String, message: String) {
+        val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(1, notificationBuilder.build())
     }
 
 }
