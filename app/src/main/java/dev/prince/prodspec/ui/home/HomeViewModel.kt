@@ -4,10 +4,13 @@ import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationCompat
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +21,7 @@ import dev.prince.prodspec.database.ProductDao
 import dev.prince.prodspec.network.ApiService
 import dev.prince.prodspec.util.CHANNEL_ID
 import dev.prince.prodspec.util.Resource
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -46,6 +50,11 @@ class HomeViewModel @Inject constructor(
     var category by mutableStateOf("Select Product Category")
 
     var productType by mutableStateOf("")
+    var productName by mutableStateOf("")
+    var price by mutableStateOf("")
+    var tax by mutableStateOf("")
+    var isAddingProduct by mutableStateOf(false)
+    var imageUri by mutableStateOf<Uri?>(null)
 
     var expandedCategoryField by mutableStateOf(false)
     var hideKeyboard by mutableStateOf(false)
@@ -60,6 +69,8 @@ class HomeViewModel @Inject constructor(
         "Watches",
         "Other"
     )
+
+    var showProductAddedDialog by mutableStateOf(false)
 
     init {
         getProductsList()
@@ -105,12 +116,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun addItem(
-        productName: String, price: String, tax: String, imageUri: Uri?
-    ) {
+    fun addItem() {
         val imagePart: List<MultipartBody.Part>? = imageUri?.let { uri ->
             val imageFile: File = getFileFromUri(context, uri)
-            val requestBody: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), imageFile)
+            val requestBody: RequestBody =
+                RequestBody.create("image/*".toMediaTypeOrNull(), imageFile)
             listOf(MultipartBody.Part.createFormData("files[]", imageFile.name, requestBody))
         }
         viewModelScope.launch {
@@ -122,12 +132,43 @@ class HomeViewModel @Inject constructor(
                     tax.toRequestBody(),
                     imagePart
                 )
-                showNotification("Product Added", "Your $productName has been successfully added.")
                 fetchProductListFromNetwork()
+                showNotification(
+                    title = "Product Added",
+                    message = "Your $productName has been successfully added."
+                )
+                delay(2000)
+                showProductAddedDialog = true
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+    }
+
+    fun validateFields(): Boolean {
+        if (productName.isBlank() || price.isBlank() || tax.isBlank()
+            || productType.isBlank() || productType == "Select Product Category"
+        ) {
+            Toast.makeText(context, "Please provide all product details", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (!tax.isDigitsOnly()) {
+            Toast.makeText(context, "Tax should be digits only!", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (!price.isDigitsOnly()) {
+            Toast.makeText(context, "Price should be digits only!", Toast.LENGTH_SHORT)
+                .show()
+            return false
+        }
+        return true
+    }
+
+    fun resetValues() {
+        productName = ""
+        tax = ""
+        price = ""
+        imageUri = null
     }
 
     private fun getFileFromUri(context: Context, uri: Uri): File {
@@ -157,7 +198,8 @@ class HomeViewModel @Inject constructor(
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(1, notificationBuilder.build())
     }
 

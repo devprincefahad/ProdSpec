@@ -1,7 +1,6 @@
 package dev.prince.prodspec.ui.home
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,6 +60,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
+import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
@@ -68,6 +68,7 @@ import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.prince.prodspec.R
 import dev.prince.prodspec.data.Product
+import dev.prince.prodspec.ui.components.AlertDialogContent
 import dev.prince.prodspec.ui.components.BottomSheet
 import dev.prince.prodspec.ui.components.ProductItem
 import dev.prince.prodspec.ui.components.SearchBar
@@ -212,6 +213,20 @@ fun HomeScreen(
                 AddProductForm()
             }
         )
+        viewModel.resetValues()
+    }
+    if (viewModel.showProductAddedDialog) {
+        AlertDialogContent(
+            onDismissRequest = {
+                viewModel.showProductAddedDialog = false
+            },
+            onConfirmation = {
+                viewModel.showProductAddedDialog = false
+            },
+            dialogTitle = "Success",
+            dialogText = "Your ${viewModel.productName} has been added successfully!",
+            confirmTitle = "Ok"
+        )
     }
 }
 
@@ -254,21 +269,11 @@ fun AddProductFab(
 @Composable
 fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
 
-    var productName by remember { mutableStateOf("") }
-    var price by remember { mutableStateOf("") }
-    var tax by remember { mutableStateOf("") }
-
-    var isAddingProduct by remember { mutableStateOf(false) }
-
-    var imageUri by remember {
-        mutableStateOf<Uri?>(null)
-    }
-
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
             uri?.let {
-                imageUri = it
+                viewModel.imageUri = it
             }
         }
     )
@@ -295,9 +300,9 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
                 },
             contentAlignment = Alignment.Center
         ) {
-            if (imageUri != null) {
+            if (viewModel.imageUri != null) {
                 AsyncImage(
-                    model = imageUri,
+                    model = viewModel.imageUri,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
@@ -332,7 +337,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
-            value = productName,
+            value = viewModel.productName,
             label = {
                 Text(
                     text = "Product Name",
@@ -346,7 +351,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
             shape = RoundedCornerShape(8.dp),
             onValueChange = {
                 if (it.length <= 25) {
-                    productName = it
+                    viewModel.productName = it
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
@@ -375,7 +380,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
-            value = tax,
+            value = viewModel.tax,
             label = {
                 Text(
                     text = "Tax",
@@ -389,7 +394,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
             shape = RoundedCornerShape(8.dp),
             onValueChange = {
                 if (it.length <= 25) {
-                    tax = it
+                    viewModel.tax = it
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
@@ -416,7 +421,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
-            value = price,
+            value = viewModel.price,
             label = {
                 Text(
                     text = "Price",
@@ -430,7 +435,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
             shape = RoundedCornerShape(8.dp),
             onValueChange = {
                 if (it.length <= 25) {
-                    price = it
+                    viewModel.price = it
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
@@ -459,13 +464,9 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
                 .fillMaxWidth()
                 .height(50.dp),
             onClick = {
-                if (productName.isNotBlank() && price.isNotBlank() && tax.isNotBlank() &&
-                    viewModel.productType.isNotBlank() && viewModel.productType != "Select Product Category"
-                ) {
-                    isAddingProduct = true
-                    viewModel.addItem(productName, price, tax, imageUri)
-                } else {
-                    Toast.makeText(context, "Please provide all product details", Toast.LENGTH_SHORT).show()
+                if (viewModel.validateFields()) {
+                    viewModel.isAddingProduct = true
+                    viewModel.addItem()
                 }
             },
             shape = RoundedCornerShape(10.dp),
@@ -474,7 +475,7 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
                 contentColor = Color.White
             )
         ) {
-            if (isAddingProduct) {
+            if (viewModel.isAddingProduct) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
                     color = Color.White
@@ -493,10 +494,10 @@ fun AddProductForm(viewModel: HomeViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LaunchedEffect(isAddingProduct) {
-            if (isAddingProduct) {
+        LaunchedEffect(viewModel.isAddingProduct) {
+            if (viewModel.isAddingProduct) {
                 delay(2000)
-                isAddingProduct = false
+                viewModel.isAddingProduct = false
                 viewModel.showSheet = false
             }
         }
